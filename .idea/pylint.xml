@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="PylintConfigService">
+    <option name="customPylintPath" value="C:\Program Files (x86)\Microsoft Visual Studio\Shared\Python37_64\Scripts\pylint.exe" />
+    <option name="pylintrcPath" value="C:\Users\ing02340\PycharmProjects\Omailer\venv\.pylintrc" />
+  </component>
+</project>
