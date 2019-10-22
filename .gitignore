@@ -1,0 +1,11 @@
+.idea/vcs.xml
+.idea/workspace.xml
+venv/Lib/*
+venv/Scripts/*
+venv/__pycache__/*
+venv/incoming/*
+venv/output/*
+venv/processed/*
+venv/pyvenv.cfg
+venv/test_incoming/*
+venv/wkhtmltopdf.exe
