@@ -7,9 +7,10 @@ ATTACHMENT_LOCATION = r'output'
 
 
 def team_bullet_list(team):
-    bullet_list = ''
+    bullet_list = '<ul>'
     for member in team:
-        bullet_list += f". {member['fresh_name'].title()}\n"
+        bullet_list += f"<li>{member['fresh_name'].title()}</li>"
+    bullet_list += '</ul>'
     return bullet_list
 
 
@@ -21,23 +22,26 @@ def find_record(value, search_in, search_by):
     return found_item
 
 
-def frame_body(manager, team, groups_report, members_report):
-    return f'''Hi {manager.split(',')[-1]},
+def frame_body(manager_name, team, groups_report, members_report):
+    return f'''<html><body style='font-family: "Verdana";'>Hi {manager_name},<br>
 The following member(s) from your team completed the bootcamp recently:
 
 {team_bullet_list(team)}
 
-In this mail, the assessment made during the bootcamp is attached. The assessment was formative, which means it focused on future improvements.
-We are interested in knowing your impressions of the engineers who have been through the bootcamp. 
-
-Please let us know any impressions.
-
-PS: This mail is sent based on the reporting structure in Outlook. 
-If any of these engineers aren't reporting to you, please bring it to our notice.
-
-Thank you,
-Bye,
-  Sudeep and Bnil
+In this mail, the assessment made during the bootcamp is attached. The assessment was <i>formative</i>, which means it focused on future improvements.<br>
+<br>
+As a process, we will approach you post 90 days, to understand:
+<ul>
+<li>Usefulness of the program</li>
+<li>Do the participants need further interventions?</li>
+<li>How the program can be improved for future batches</li>
+</ul>
+Please let us know any impressions, or if you need clarifications.<br>
+<br>
+Thank you,<br>
+Bye,<br>
+  Bnil and Sudeep
+</body></html>
 '''
 
 
@@ -49,6 +53,11 @@ def make_html_for_member(member, groups_report, members_report):
         return rating_map.GROUP_ASSESSMENT_MAP[case_study_record[key]]
     def indiv_rating(key):
         return rating_map.INDIVIDUAL_ASSESSMENT_MAP[individual_record[key]]
+    def optional_individual_remark(label, key):
+        if key in individual_record:
+            return f'{label}: {individual_record[key]}'
+        return ''
+
     return f'''
 <html>
 <style>
@@ -58,7 +67,7 @@ table, td, th {{border: 1px solid #ddd;padding: 8px;}}
 </style>
 <h1>{member['fresh_name']}</h1>
 <p>e-mail: {email}</p>
-<h2>Group case-study</h2>
+<br><h2>Group case-study</h2>
 <p>As part of the bootcamp, two case studies were done. 
 In the second case study, participants exchanged their work to make improvements on another team's code.
 This is {member['fresh_name'].split()[0].title()}'s team-assessment, done as per Philips Behaviors.</p>
@@ -81,15 +90,16 @@ This is {member['fresh_name'].split()[0].title()}'s team-assessment, done as per
 <td>{group_rating('unit_tests')}<br>{group_rating('automation')}</td>
 </tr>
 </table>
-<h2>Individual Assessment</h2>
+<br><h2>Individual Assessment</h2>
 <p>The following scores are on a scale of 1 to 5, with 5 being the highest</p>
 <table>
 <tr><th>Clarity of thought and expression</th><td>{indiv_rating('clarity')}</td></tr>
 <tr><th>Response to Queries</th><td>{indiv_rating('q_response')}</td></tr>
 <tr><th>Team Player</th><td>{indiv_rating('team_play')}</td></tr>
 <tr><th>Confidence</th><td>{indiv_rating('confidence')}</td></tr>
-<tr><th>Utilization of mentor</th><td>{indiv_rating('util_mentor')}</td></tr>
+<tr><th>Utilization of mentor and experts</th><td>{indiv_rating('util_mentor')}</td></tr>
 </table>
+<br><p>{optional_individual_remark('Additional Remark', 'remark')}</p>
 </html>
     '''
 
@@ -129,11 +139,11 @@ def frame_attachments(team, groups_report, members_report):
     return attachments
 
 
-def frame_mail(manager, team, groups_report, members_report):
-    mail = {'to': manager,
+def frame_mail(manager_name, manager_contact, team, groups_report, members_report):
+    mail = {'to': manager_contact,
             'cc': 'sudeep.prasad@philips.com; bnil.nath@philips.com',
             'subject': 'Bootcamp summary: Your reports',
-            'body': frame_body(manager, team, groups_report, members_report),
+            'body': frame_body(manager_name, team, groups_report, members_report),
             'attachments': frame_attachments(team, groups_report, members_report)
            }
     return mail

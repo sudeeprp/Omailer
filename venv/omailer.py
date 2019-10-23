@@ -26,7 +26,7 @@ def send_notification(mail_content):
     mail.To = mail_content['to']
     mail.Cc = mail_content['cc']
     mail.Subject = mail_content['subject']
-    mail.body = mail_content['body']
+    mail.HtmlBody = mail_content['body']
     for attachment in mail_content['attachments']:
         attachment_path = os.path.realpath(attachment)
         mail.Attachments.Add(attachment_path)

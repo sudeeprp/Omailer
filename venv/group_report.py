@@ -39,5 +39,7 @@ def make_fresh_report(mapped_rows):
         fresh_report['team_play'] = row['Team Player'.lower()]
         fresh_report['confidence'] = row['Confidence'.lower()]
         fresh_report['util_mentor'] = row['Utilization of mentor for learning'.lower()]
+        if 'remark' in row:
+            fresh_report['remark'] = row['remark']
         freshers_report.append(fresh_report)
     return freshers_report
