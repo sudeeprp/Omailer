@@ -63,6 +63,6 @@ def get_sheet(excel_filename, sheet_number=0):
     return ws
 
 
-def rows_to_dict_list(excel_filename, heading_row=1):
-    ws = get_sheet(excel_filename)
+def rows_to_dict_list(excel_filename, sheet_index=0, heading_row=1):
+    ws = get_sheet(excel_filename, sheet_number=sheet_index)
     return map_rows_in_sheet(ws, heading_row=heading_row)

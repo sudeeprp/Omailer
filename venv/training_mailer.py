@@ -1,15 +1,9 @@
 import os
-import json
+import sys
 import excel2json
 import omailer
 import group_report
-import mailframe
-
-
-PROCESSED_MANAGER_MAP = r'processed\dummy_manager_map.json'
-REPORTS_FILE = r'incoming\Bootcamp case2 rubric.xlsx'
-FRESH_REPORTS_FILE = r'incoming\Case 1 Review_U.xlsx'
-FRESH_EMAIL_TO_MANAGER_MAP = r'incoming\member email to manager map.xlsx'
+import trainmailframe
 
 
 def get_fresh_email_to_manager_email():
@@ -37,21 +31,25 @@ def make_manager_map(mapped_rows):
     return manager_to_team_map
 
 
-def mail_managers(manager_map, participants_map):
-    mapped_fresh = excel2json.rows_to_dict_list(FRESH_REPORTS_FILE)
-    members_report = group_report.make_fresh_report(mapped_fresh)
-
-    for manager in manager_map:
-        mail = mailframe.frame_mail(manager.split(',')[-1].title(),
-                                    manager_map[manager]['manager_contact'],
-                                    manager_map[manager]['team'],
-                                    participants_map, members_report)
+def mail_managers(course_name, participants_map):
+    print(course_name)
+    for participant in participants_map:
+        mail = trainmailframe.frame_mail(course_name, participant)
         omailer.send_notification(mail)
         print(str(mail))
         print('---------------------------------------')
 
 
+def get_course_name(excel_filename):
+    ws = excel2json.get_sheet(excel_filename, sheet_number=1)
+    course_name = ws['A1']
+    return course_name
+
+
 if __name__ == "__main__":
-    participants_map = excel2json.rows_to_dict_list(REPORTS_FILE, heading_row=2)
-    manager_map = make_manager_map(participants_map)
-    mail_managers(manager_map, participants_map)
+    if len(sys.argv) == 2:
+        excel_filename = sys.argv[1]
+        participants_map = excel2json.rows_to_dict_list(excel_filename, sheet_index=1, heading_row=2)
+        mail_managers(get_course_name(excel_filename), participants_map)
+    else:
+        print(f"Usage: python {sys.argv[0]} <excel path>")
