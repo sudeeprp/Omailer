@@ -39,8 +39,7 @@ As part of the process, we will approach you post 90 days to understand:
 Please let us know any impressions, or if you need clarifications.<br>
 <br>
 Thank you,<br>
-Bye,<br>
-  Bnil and Sudeep
+  L&D Team
 </body></html>
 '''
 
@@ -150,8 +149,8 @@ def frame_attachments(team, groups_report, members_report):
 
 def frame_mail(manager_name, manager_contact, team, groups_report, members_report):
     mail = {'to': manager_contact,
-            'cc': 'sudeep.prasad@philips.com; bnil.nath@philips.com',
-            'subject': 'Bootcamp summary: Your reports',
+            'cc': 'sudeep.prasad@philips.com; agusty.rebekah@philips.com',
+            'subject': 'Bootcamp assessment-summary for your team member(s)',
             'body': frame_body(manager_name, team, groups_report, members_report),
             'attachments': frame_attachments(team, groups_report, members_report)
            }
