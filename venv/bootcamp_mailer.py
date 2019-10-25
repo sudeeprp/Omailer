@@ -12,15 +12,10 @@ FRESH_REPORTS_FILE = r'incoming\Case 1 Review_U.xlsx'
 FRESH_EMAIL_TO_MANAGER_MAP = r'incoming\member email to manager map.xlsx'
 
 
-def rows_to_dict_list(excel_filename):
-    ws = excel2json.get_sheet(excel_filename)
-    return excel2json.map_rows_in_sheet(ws)
-
-
 def get_fresh_email_to_manager_email():
     fresh_email_to_manager_email = {}
     if os.path.isfile(FRESH_EMAIL_TO_MANAGER_MAP):
-        fresh_manager_emails = rows_to_dict_list(FRESH_EMAIL_TO_MANAGER_MAP)
+        fresh_manager_emails = excel2json.rows_to_dict_list(FRESH_EMAIL_TO_MANAGER_MAP)
         for email_pair in fresh_manager_emails:
             fresh_email_to_manager_email[email_pair['member email'].lower()] = email_pair['manager email'].lower()
     return fresh_email_to_manager_email
@@ -70,7 +65,7 @@ def mail_managers(mapped_groups):
     manager_map = read_manager_map()
     groups_report = group_report.make_groups_report(mapped_groups)
 
-    mapped_fresh = rows_to_dict_list(FRESH_REPORTS_FILE)
+    mapped_fresh = excel2json.rows_to_dict_list(FRESH_REPORTS_FILE)
     members_report = group_report.make_fresh_report(mapped_fresh)
 
     for manager in manager_map:
@@ -84,7 +79,7 @@ def mail_managers(mapped_groups):
 
 
 if __name__ == "__main__":
-    groups = rows_to_dict_list(CASE2_GROUP_REPORTS_FILE)
+    groups = excel2json.rows_to_dict_list(CASE2_GROUP_REPORTS_FILE)
     print(f'Got {len(groups)} rows from {CASE2_GROUP_REPORTS_FILE}')
     create_manager_map(groups)
     mail_managers(groups)

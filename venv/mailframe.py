@@ -30,7 +30,7 @@ The following member(s) from your team completed the bootcamp recently:
 
 In this mail, the assessment made during the bootcamp is attached. The assessment was <i>formative</i>, which means it focused on future improvements.<br>
 <br>
-As a process, we will approach you post 90 days, to understand:
+As part of the process, we will approach you post 90 days to understand:
 <ul>
 <li>Usefulness of the program</li>
 <li>Do the participants need further interventions?</li>
@@ -45,6 +45,12 @@ Bye,<br>
 '''
 
 
+def indiv_rating_row(before, after):
+    if after != before:
+        after = '<b>' + after + '</b>'
+    return f'''<td style="text-align:center">{before}</td><td style="text-align:center">{after}</td>'''
+
+
 def make_html_for_member(member, groups_report, members_report):
     email = member['fresh_email']
     case_study_record = find_record(email, search_in=groups_report, search_by='members')
@@ -52,7 +58,8 @@ def make_html_for_member(member, groups_report, members_report):
     def group_rating(key):
         return rating_map.GROUP_ASSESSMENT_MAP[case_study_record[key]]
     def indiv_rating(key):
-        return rating_map.INDIVIDUAL_ASSESSMENT_MAP[individual_record[key]]
+        before_after = individual_record[key]
+        return indiv_rating_row(before_after.split()[0], before_after.split()[-1])
     def optional_individual_remark(label, key):
         if key in individual_record:
             return f'{label}: {individual_record[key]}'
@@ -63,7 +70,7 @@ def make_html_for_member(member, groups_report, members_report):
 <style>
 h1, h2, p, table {{font-family: "Verdana";font-size: 100%;}}
 table {{border-collapse: collapse;}}
-table, td, th {{border: 1px solid #ddd;padding: 8px;}}
+table, td, th {{border: 1px solid #aaa;padding: 8px;}}
 </style>
 <h1>{member['fresh_name']}</h1>
 <p>e-mail: {email}</p>
@@ -77,7 +84,7 @@ This is {member['fresh_name'].split()[0].title()}'s team-assessment, done as per
 <td>{group_rating('cust_first')}</td>
 </tr>
 <tr>
-<th>Quality <span style="font-size: 70%">and Integrity always,</span>
+<th>Quality<br>Integrity always,
 <p>Eager to improve</p></th>
 <td>{group_rating('q_always')}</td>
 </tr>
@@ -91,17 +98,19 @@ This is {member['fresh_name'].split()[0].title()}'s team-assessment, done as per
 </tr>
 </table>
 <br><h2>Individual Assessment</h2>
-<p>The following scores are on a scale of 1 to 5, with 5 being the highest</p>
+<p>Capabilities were assessed at the beginning of the program and towards the end as well. The scores are given below.</p>
 <table>
-<tr><th>Clarity of thought and expression</th><td>{indiv_rating('clarity')}</td></tr>
-<tr><th>Response to Queries</th><td>{indiv_rating('q_response')}</td></tr>
-<tr><th>Team Player</th><td>{indiv_rating('team_play')}</td></tr>
-<tr><th>Confidence</th><td>{indiv_rating('confidence')}</td></tr>
-<tr><th>Utilization of mentor and experts</th><td>{indiv_rating('util_mentor')}</td></tr>
+<tr><th>Criteria</th><th>Pre-assessment</th><th>Post-assessment</th></tr>
+<tr><th>Clarity of thought and expression</th>{indiv_rating('clarity')}</tr>
+<tr><th>Response to Queries</th>{indiv_rating('q_response')}</tr>
+<tr><th>Team Player</th>{indiv_rating('team_play')}</tr>
+<tr><th>Confidence</th>{indiv_rating('confidence')}</tr>
+<tr><th>Utilization of mentor and experts</th>{indiv_rating('util_mentor')}</tr>
 </table>
+<p>5 = Excellent, 4 = Good, 3 = Acceptable, 2 = Needs focus, 1 = Needs help</p>
 <br><p>{optional_individual_remark('Additional Remark', 'remark')}</p>
 </html>
-    '''
+'''
 
 
 def write_report(filename, html):

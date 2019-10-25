@@ -61,3 +61,8 @@ def get_sheet(excel_filename, sheet_number=0):
     w = load_workbook(excel_filename, data_only=True)
     ws = Sheet(w[w.sheetnames[sheet_number]])
     return ws
+
+
+def rows_to_dict_list(excel_filename, heading_row=1):
+    ws = get_sheet(excel_filename)
+    return map_rows_in_sheet(ws, heading_row=heading_row)
