@@ -26,14 +26,11 @@ Below is the test result for your team member; please look at appropriate remedi
 Program Name: {course_name}
 <br>
 <table>
-<tr><th>Employee ID</th><th>Participant</th><th>Manager</th><th>Result</th><th>Remarks</th></tr>
-<tr>
-<td>{try_get(member_report, 'Employee ID')}</td>
-<td>{try_get(member_report, 'Participant')}</td>
-<td>{try_get(member_report, 'Manager')}</td>
-<td>{try_get(member_report, 'Result')}</td>
-<td>{try_get(member_report, 'Remarks')}</td>
-</tr>
+<tr><th>Employee ID</th><td>{try_get(member_report, 'Employee ID')}</td></tr>
+<tr><th>Participant</th><td>{try_get(member_report, 'Participant')}</td></tr>
+<tr><th>Manager</th><td>{try_get(member_report, 'Manager')}</td></tr>
+<tr><th>Result</th><td>{try_get(member_report, 'Result')}</td></tr>
+<tr><th>Remarks</th><td>{try_get(member_report, 'Remarks')}</td></tr>
 </table>
 <br>
 Thank you,<br>

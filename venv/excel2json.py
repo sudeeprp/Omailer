@@ -8,10 +8,7 @@ class Sheet:
     def __getitem__(self, item):
         cell_value = self.wsheet[item].value
         if cell_value is not None:
-            try:
-                cell_value = '{0:g}'.format(cell_value)
-            except ValueError:
-                cell_value = str(self.wsheet[item].value).strip()
+            cell_value = str(self.wsheet[item].value).strip()
         return cell_value
 
 
