@@ -16,14 +16,12 @@ def frame_body(course_name, member_report):
     return f'''<html>
 <style>
 table {{border-collapse: collapse;}}
-table, td, th {{font-family: "Verdana";border: 1px solid #aaa;padding: 8px;}}
+table, td, th {{font-family: "Calibri";border: 1px solid #aaa;padding: 8px;}}
 </style>
-<body style='font-family: "Verdana";'>Dear {email_to_name(try_get(member_report, 'manager'))},<br>
+<body style='font-family: "Calibri";'>Dear {email_to_name(try_get(member_report, 'manager'))},<br>
 As per our training policy, assessment is mandatory to complete for technical learning programs.<br>
 <br>
 Below is the test result for your team member; please look at appropriate remediation if the participant has not cleared the test.<br>
-<br>
-Program Name: {course_name}
 <br>
 <table>
 <tr><th>Employee ID</th><td>{try_get(member_report, 'Employee ID')}</td></tr>
@@ -33,8 +31,10 @@ Program Name: {course_name}
 <tr><th>Remarks</th><td>{try_get(member_report, 'Remarks')}</td></tr>
 </table>
 <br>
-Thank you,<br>
-  L&D Team
+Thanks,<br>
+<br>
+Bnil Nath
+<p style='color: Gray;'>Learning and Development Team</p>
 </body></html>
 '''
 
@@ -42,8 +42,8 @@ Thank you,<br>
 
 def frame_mail(course_name, member_report):
     mail = {'to': member_report['manager'],
-            'cc': 'sudeep.prasad@philips.com; agusty.rebekah@philips.com',
-            'subject': course_name,
+            'cc': f"{try_get(member_report, 'Participant')}; agusty.rebekah@philips.com",
+            'subject': f'Test Result: {course_name}',
             'body': frame_body(course_name, member_report),
            }
     return mail
