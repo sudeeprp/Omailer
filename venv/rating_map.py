@@ -1,25 +1,80 @@
 
+def map_score(record, name_of_rating, ranges):
+    if name_of_rating not in record:
+        return 'Not evaluated'
+    return map_message(record[name_of_rating], ranges)
 
-GROUP_ASSESSMENT_MAP = {
-    'A: Anticipated cust.needs': '''In addtion to understanding the requirements, the team took effort to anticipate future customer needs.''',
-    'B: Seek cust.need': '''In addition to understanding the requirements, the team sought to understand the customer context.''',
-    'C: Goals clear but no cust.link': '''The team understood their goals clearly. In future, they could use the opportunity to understand the customer context and anticipate their needs.''',
-    'D: Goals unclear / impl.driven': '''The team implemented the specified functionality. In future, they could clarify the goals pro-actively and focus on the customer context.''',
+def map_message(rating_str, ranges):
+    rating = int(rating_str)
+    for rate_range in ranges:
+        if rating <= rate_range['upto']:
+            return rate_range["msg"]
+    raise Exception(f"invalid rate {rating_str}")
 
-    'A: Multiple improvements done': '''The team made multiple improvements to the code they inherited, in areas of warnings, linting, complexity, duplication and readability.<br>They have applied clean-coding learnings effectively.''',
-    'B: At least one improvement': '''The team improved the code they received in terms of readability.<br>They have demonstrated basic application of clean-code principles. They can practice giving it continuous attention, going forward.''',
-    'C: No improvement implemented': '''The team built on the code they received, complying to existing patterns.''',
+def upto(upper, message):
+    return {"upto": upper, "msg": message}
 
-    'A: Persisted in adversity': '''The team took effort to research clean design and implementation, even when they encountered obstacles.''',
-    'B: Ownership of modules': '''The team took ownership of the application, modifying it to suit their needs.''',
-    'C: Just made it work': '''The team did the required work to function on top of existing code. In future, they could focus on improving the code-quality during maintenance.''',
+def customer_first(record):
+    return map_score(
+        record, '2-customer first',
+        [upto(4, 'Needs to practice customer-focus. Next step: Start questioning the purpose of the code.'),
+         upto(6, 'Has sensitivity to customer-needs. Next step: Start on marketing material of your product.'),
+         upto(8, 'Strives to get familiar with customer-related terminology. Next step: Broaden by exploring competition and industry sites.'),
+         upto(10, 'Excellent customer-focus. Next step: Challenge by interfacing with stakeholders.')]
+    )
 
-    'A: Cover all unit-risk': '''The team covered all major risks in unit-testing, achieving a solid base of the test-pyramid.''',
-    'B: Coverage >75%': '''The team achieved coverage >75%, covering all the risky aspects of the system.''',
-    'C: Covered easy part': '''The team covered the code that was easy to cover. In future, they could focus on refactoring for testability.''',
+def quality_integrity(record):
+    if '1-dev.efficiency' not in record or '2-ci pipe' not in record:
+        return "Not evaluated"
+    rating_avg = (int(record['1-dev.efficiency']) + int(record['2-ci pipe'])) / 2
+    return map_message(
+        rating_avg,
+        [upto(4, 'Needs to practice techniques to bring developer efficiency. Next step: Start getting familiar with CI pipes and micro-automation.'),
+         upto(6, 'Has attempted automated tests and Continuous Integration. Next step: Start looking for ways to enhance error-handling.'),
+         upto(8, 'Strives to enhance reliability and believes in automation. Next step: Involve in improving practices around you.'),
+         upto(10, 'Proficient in usage of tools and Continuous Integration. Next step: Challenge with real-world problems.')]
+    )
 
-    "A: Auto'd all possible": '''The team has automated all test flows and checks.''',
-    "B: Auto'd unit&API checks": '''The team has automated unit and API-level tests along with relevant checks.''',
-    "C: Auto'd with manual checks": '''The team has automated test execution, while the checks have remained manual. In future, they could design to automate the checks at the start itself.''',
-    "D: Minimal or no automation": '''The team tested everything manually. In future, they could focus on automating the flows, along with checks and asserts.'''
-}
+def improve_existing(record):
+    if '2-reliability / error handling' not in record or '2-code organization' not in record:
+        return "Not evaluated"
+    rating_avg =\
+        (int(record['2-reliability / error handling']) + int(record['2-code organization'])) / 2
+    return map_message(
+        rating_avg,
+        [upto(4, 'Needs to practice improving existing code. Next step: Review instances where legacy improvements can be made.'),
+         upto(6, 'Has appreciation for old code and recognizes improvements. Next step: Assign tasks that need legacy-code-improvements.'),
+         upto(8, 'Strives to improve legacy and organizes well. Next step: Look for improvement opportunities in production code.'),
+         upto(10, 'Has demonstrated boy-scout rule with efficient organization. Next step: Challenge with business-problem related to legacy code.')]
+    )
+
+def teamwork_ownership(record):
+    return map_score(
+        record, '2-teamwork & ownership',
+        [upto(6, 'Needs to practice working in teams. Next step: Initiate conversations with team-members.'),
+         upto(8, 'Has demonstrated good teamwork. Next step: Initiate conversations with seniors.'),
+         upto(10, 'Strives to excel and appreciates team-mates. Next step: Challenge with tasks that require stakeholder-buy-in.')]
+    )
+
+def score_to_practice(stage_of_bootcamp, record, name_of_rating):
+    if name_of_rating not in record:
+        return "Not evaluated"
+    return stage_of_bootcamp + ": " + map_message(
+        record[name_of_rating],
+        [upto(3, 'Getting started'),
+         upto(6, 'Initial practice'),
+         upto(8, 'Standard practice'),
+         upto(10, 'Advanced practice')]
+    )
+
+def message_mid(record, name_of_rating):
+    return score_to_practice("Own code", record, name_of_rating)
+
+def message_final(record, name_of_rating):
+    return score_to_practice("Legacy with dependencies", record, name_of_rating)
+
+def optional_remark(record):
+    if 'remarks' in record:
+        return 'Additional Remarks: ' + record['remarks']
+    else:
+        return ""

@@ -6,10 +6,9 @@ import group_report
 import mailframe
 
 
-PROCESSED_MANAGER_MAP = r'processed\dummy_manager_map.json'
-CASE2_GROUP_REPORTS_FILE = r'incoming\Bootcamp case2 rubric.xlsx'
-FRESH_REPORTS_FILE = r'incoming\Case 1 Review_U.xlsx'
 FRESH_EMAIL_TO_MANAGER_MAP = r'incoming\member email to manager map.xlsx'
+PROCESSED_MANAGER_MAP_TIDY = r'processed\manager_map.json'
+PARTICIPANTS_REPORT_FILE = r'incoming\feedback-2020.xlsx'
 
 
 def get_fresh_email_to_manager_email():
@@ -17,69 +16,66 @@ def get_fresh_email_to_manager_email():
     if os.path.isfile(FRESH_EMAIL_TO_MANAGER_MAP):
         fresh_manager_emails = excel2json.rows_to_dict_list(FRESH_EMAIL_TO_MANAGER_MAP)
         for email_pair in fresh_manager_emails:
-            fresh_email_to_manager_email[email_pair['member email'].lower()] = email_pair['manager email'].lower()
+            fresh_email_to_manager_email[email_pair['participant philips email'].lower()]\
+                = email_pair['joining team manager email'].lower()
     return fresh_email_to_manager_email
 
 
-def make_manager_map(contacts_index, mapped_rows):
+def get_name(row):
+    if 'name' in row:
+        return row['name']
+    else:
+        return row['1-name']
+
+
+def select_for_feedback(rows):
+    return [r for r in rows if
+            'participant philips email' in r and
+            'joining team manager email' in r]
+
+
+def make_manager_map(mapped_rows):
     manager_to_team_map = {}
-    fresh_email_to_manager_email = get_fresh_email_to_manager_email()
-    for row in mapped_rows:
-        fresh_name = row['employee name']
-        fresh_email = row['email - primary work'].lower()
-        fresh_americaname = row['americaname'].lower()
-        if len(fresh_email_to_manager_email) > 0:
-            manager_contact = fresh_email_to_manager_email[fresh_email]
-            manager_americaname = f"{manager_contact}, {manager_contact.split('@')[0].split('.')[0]}"
-        else:
-            manager_americaname = omailer.find_manager_from_lowcase_americaname\
-                                    (contacts_index, fresh_americaname, fresh_email)
-            manager_contact = manager_americaname
-        if manager_americaname not in manager_to_team_map:
-            manager_to_team_map[manager_americaname] = {'manager_contact': manager_contact, 'team': []}
-        manager_to_team_map[manager_americaname]['team']\
+    rows_to_feedback = select_for_feedback(mapped_rows)
+    for row in rows_to_feedback:
+        fresh_email = row['participant philips email'].lower()
+        manager_contact = row['joining team manager email']
+        if manager_contact not in manager_to_team_map:
+            manager_to_team_map[manager_contact] = \
+                {'manager_name': row['joining team manager'], 'team': []}
+        manager_to_team_map[manager_contact]['team']\
             .append({'fresh_email': fresh_email,
-                     'fresh_name': fresh_name})
+                     'fresh_record': row})
     return manager_to_team_map
 
 
-def write_manager_map(contacts_index, mapped_rows):
-    manager_map = make_manager_map(contacts_index, mapped_rows)
-    with open(PROCESSED_MANAGER_MAP, 'w') as f:
+def write_manager_map(mapped_rows):
+    manager_map = make_manager_map(mapped_rows)
+    with open(PROCESSED_MANAGER_MAP_TIDY, 'w') as f:
         f.write(json.dumps(manager_map, indent=2))
     print('\nWrote {} managers'.format(len(manager_map)))
 
 
 def read_manager_map():
-    with open(PROCESSED_MANAGER_MAP, 'r') as f:
+    with open(PROCESSED_MANAGER_MAP_TIDY, 'r') as f:
         return json.loads(f.read())
 
 
-def create_manager_map(mapped_groups):
-    contacts_index = omailer.get_all_contacts()
-    print('Got {} contacts'.format(contacts_index.total()))
-    write_manager_map(contacts_index, mapped_groups)
-
-
-def mail_managers(mapped_groups):
-    manager_map = read_manager_map()
-    groups_report = group_report.make_groups_report(mapped_groups)
-
-    mapped_fresh = excel2json.rows_to_dict_list(FRESH_REPORTS_FILE)
-    members_report = group_report.make_fresh_report(mapped_fresh)
-
-    for manager in manager_map:
-        mail = mailframe.frame_mail(manager.split(',')[-1].title(),
-                                    manager_map[manager]['manager_contact'],
-                                    manager_map[manager]['team'],
-                                    groups_report, members_report)
-        omailer.send_notification(mail)
-        print(str(mail))
-        print('---------------------------------------')
+def mail_managers(manager_map_filename):
+    with open(manager_map_filename, 'r') as manager_map_file:
+        manager_contact_to_records = json.loads(manager_map_file.read())
+        for manager_contact in manager_contact_to_records:
+            record = manager_contact_to_records[manager_contact]
+            mail = mailframe.frame_mail(record['manager_name'].split()[0].title(),
+                                        manager_contact,
+                                        record['team'])
+            omailer.send_notification(mail)
+            print(f"Sent to {record['manager_name']}")
+            print('---------------------------------------')
 
 
 if __name__ == "__main__":
-    groups = excel2json.rows_to_dict_list(CASE2_GROUP_REPORTS_FILE)
-    print(f'Got {len(groups)} rows from {CASE2_GROUP_REPORTS_FILE}')
-    create_manager_map(groups)
-    mail_managers(groups)
+    participants = excel2json.rows_to_dict_list(PARTICIPANTS_REPORT_FILE)
+    print(f'Got {len(participants)} rows from {PARTICIPANTS_REPORT_FILE}')
+    write_manager_map(participants)
+    mail_managers(PROCESSED_MANAGER_MAP_TIDY)

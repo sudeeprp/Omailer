@@ -11,22 +11,22 @@ def format_participants(participants):
 
 
 streams = {
-    'S1-emb': {
+    'S1': {
         'description': 'explores C++ in an embedded context',
         'languages': ['C++'],
         'technologies': ['One of Windows or Linux']
     },
-    'S2-app-desk': {
+    'S2.1': {
         'description': 'explores desktop-application development using Microsoft Technologies',
         'languages': ['C++', 'C#'],
         'technologies': ['WCF', 'WPF', '.net core']
     },
-    'S2-app-web': {
+    'S2.2': {
         'description': 'explores web-application development using Microsoft Technologies',
         'languages': ['C#'],
         'technologies': ['.net core', 'Angular']
     },
-    'S3-cloud': {
+    'S3': {
         'description': 'explores web- and app-development using Java',
         'languages': ['Java'],
         'technologies': ['Spring', 'Angular']
@@ -36,13 +36,17 @@ streams = {
 
 def frame_mail(manager_email, greeting_name, participants, stream_name):
     mail = {'to': manager_email,
-            'cc': 'sudeep.prasad@philips.com',
+            'cc': 'sudeep.prasad@philips.com; bnil.nath@philips.com',
             'subject': f'Confirmation of bootcamp course-content',
             'body':
                 f'''<body style='font-family: "Calibri";'>Hi {greeting_name},<br>
+<p>This year, we are tuning the bootcamp to be closer to your needs
+(finer-grained than last year's streams)</p>
+
 The following fresh engineers will be joining your team after the bootcamp:
 {format_participants(participants)}
-<p>This mail is to confirm their course-contents and technology exposure.</p>
+<p>This mail is to confirm their course-contents and technology exposure.
+Kindly respond by <b>Monday 27 July</b></p>
 
 <p>We intend to include them in the stream called
 <a href="https://forms.microsoft.com/Pages/ResponsePage.aspx?id=LXpAGnV2F02GkrOsKFMG5MIBykE8w1FAqEb47Plu6GVURDJUVkpMSkxERVhOTEo1ODU3SkdCTzQ1RS4u">
@@ -65,6 +69,8 @@ The above participants will work with the following in the bootcamp:
 <li>Languages: {', '.join(streams[stream_name]['languages'])}</li>
 <li>Technologies: {', '.join(streams[stream_name]['technologies'])}</li>
 </ul>
+<p>After collecting confirmations from all respondents,
+we will make & communicate the batches and day-wise-plan.<p>
 <p>In case of any discrepancy in the batch, language or technology, please respond in
 <a href="https://forms.microsoft.com/Pages/ResponsePage.aspx?id=LXpAGnV2F02GkrOsKFMG5MIBykE8w1FAqEb47Plu6GVURDJUVkpMSkxERVhOTEo1ODU3SkdCTzQ1RS4u">this form</a>
 </p>
@@ -79,28 +85,38 @@ Bnil and Sudeep
     return mail
 
 
-def filter_entries_with_email(entries):
+def entries_with_email(entries):
     return [x for x in entries if 'email' in x]
+
+
+def is_team_member(entry, manager_email, stream_name):
+   return 'email' in entry\
+        and entry['email'] == manager_email\
+        and entry['stream'] == stream_name\
+        and 'participant name' in entry
+
+
+def stream_of_team(stream_map, manager_email, stream_name):
+    return [row for row in stream_map if is_team_member(row, manager_email, stream_name)]
 
 
 def get_unique_manager_streams(stream_map):
     manager_streams_map = {}
-    for stream_row in filter_entries_with_email(stream_map):
+    for stream_row in entries_with_email(stream_map):
         if stream_row['email'] in manager_streams_map:
-            manager_streams_map[stream_row['email']]['streams'].append(stream_row['stream'])
+            manager_streams_map[stream_row['email']]['streams'].add(stream_row['stream'])
         else:
             manager_streams_map[stream_row['email']] = {
                 'name': stream_row['name'],
-                'streams': [stream_row['stream']]
+                'streams': {stream_row['stream']}
             }
     return manager_streams_map
 
 
 def get_participants(stream_map, manager_email, stream_name):
     participants = []
-    for stream_row in filter_entries_with_email(stream_map):
-        if stream_row['email'] == manager_email and stream_row['stream'] == stream_name:
-            participants.append(stream_row['participant name'])
+    for stream_row in stream_of_team(stream_map, manager_email, stream_name):
+        participants.append(stream_row['participant name'])
     if len(participants) == 0:
         print(f"WARNING: No participants for {manager_email} / {stream_name}!")
     return participants

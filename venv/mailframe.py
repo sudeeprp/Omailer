@@ -1,6 +1,6 @@
 import os
 import subprocess
-import rating_map
+import rating_map as r
 
 
 ATTACHMENT_LOCATION = r'output'
@@ -9,26 +9,16 @@ ATTACHMENT_LOCATION = r'output'
 def team_bullet_list(team):
     bullet_list = '<ul>'
     for member in team:
-        bullet_list += f"<li>{member['fresh_name'].title()}</li>"
+        bullet_list += f"<li>{member['fresh_record']['name'].title()}</li>"
     bullet_list += '</ul>'
     return bullet_list
 
 
-def find_record(value, search_in, search_by):
-    found_item = None
-    found_list = [item for item in search_in if value in item[search_by]]
-    if len(found_list) == 1:
-        found_item = found_list[0]
-    return found_item
-
-
-def frame_body(manager_name, team, groups_report, members_report):
+def frame_body(manager_name, team):
     return f'''<html><body style='font-family: "Verdana";'>Hi {manager_name},<br>
-The following member(s) from your team completed the bootcamp recently:
-
-{team_bullet_list(team)}
-
-In this mail, the assessment made during the bootcamp is attached. The assessment was <i>formative</i>, which means it focused on future improvements.<br>
+The bootcamp assessment reports are attached.
+These assessments are focused on opportunities to build their skills further.<br>
+Some assessments may not be evaluated due to their absence / exams. Other reasons, if any, are marked in the report.<br>
 <br>
 As part of the process, we will approach you post 90 days to understand:
 <ul>
@@ -36,6 +26,10 @@ As part of the process, we will approach you post 90 days to understand:
 <li>Do the participants need further interventions?</li>
 <li>How the program can be improved for future batches</li>
 </ul>
+The following member(s) from your team completed the bootcamp recently:
+
+{team_bullet_list(team)}
+
 Please let us know any impressions, or if you need clarifications.<br>
 <br>
 Thank you,<br>
@@ -50,20 +44,7 @@ def indiv_rating_row(before, after):
     return f'''<td style="text-align:center">{before}</td><td style="text-align:center">{after}</td>'''
 
 
-def make_html_for_member(member, groups_report, members_report):
-    email = member['fresh_email']
-    case_study_record = find_record(email, search_in=groups_report, search_by='members')
-    individual_record = find_record(email, search_in=members_report, search_by='email')
-    def group_rating(key):
-        return rating_map.GROUP_ASSESSMENT_MAP[case_study_record[key]]
-    def indiv_rating(key):
-        before_after = individual_record[key]
-        return indiv_rating_row(before_after.split()[0], before_after.split()[-1])
-    def optional_individual_remark(label, key):
-        if key in individual_record:
-            return f'{label}: {individual_record[key]}'
-        return ''
-
+def make_html_for_member(record):
     return f'''
 <html>
 <style>
@@ -71,43 +52,46 @@ h1, h2, p, table {{font-family: "Verdana";font-size: 100%;}}
 table {{border-collapse: collapse;}}
 table, td, th {{border: 1px solid #aaa;padding: 8px;}}
 </style>
-<h1>{member['fresh_name']}</h1>
-<p>e-mail: {email}</p>
-<br><h2>Group case-study</h2>
-<p>As part of the bootcamp, two case studies were done. 
+<h1>{record['name']}</h1>
+<p>e-mail: {record['participant philips email']}</p>
+<br><h2>Participant Performance Track</h2>
+<p>As part of the bootcamp, participants submitted assignments and worked in teams on case-studies.
 In the second case study, participants exchanged their work to make improvements on another team's code.
-This is {member['fresh_name'].split()[0].title()}'s team-assessment, done as per Philips Behaviors.</p>
+This is {record['name'].split()[0].title()}'s team-assessment, done as per Philips Behaviors.
+The Philips Behaviors have been tailored to the work they may perform as fresh engineers</p>
 <table>
 <tr>
 <th>Customers first</th>
-<td>{group_rating('cust_first')}</td>
+<td>{r.customer_first(record)}</td>
 </tr>
 <tr>
-<th>Quality<br>Integrity always,
-<p>Eager to improve</p></th>
-<td>{group_rating('q_always')}</td>
+<th>Quality<br>Integrity always</th>
+<td>{r.quality_integrity(record)}</td>
 </tr>
 <tr>
-<th>Team up to win</th>
-<td>{group_rating('team_own')}</td>
+<th>Eager to improve</th>
+<td>{r.improve_existing(record)}</td>
 </tr>
 <tr>
-<th>Take ownership to deliver fast</th>
-<td>{group_rating('unit_tests')}<br>{group_rating('automation')}</td>
+<th><p>Team up to win</p><p>Take ownership to deliver fast</p></th>
+<td>{r.teamwork_ownership(record)}</td>
 </tr>
 </table>
-<br><h2>Individual Assessment</h2>
+<br><h2>Individual Performance Track</h2>
 <p>Capabilities were assessed at the beginning of the program and towards the end as well. The scores are given below.</p>
 <table>
-<tr><th>Criteria</th><th>Pre-assessment</th><th>Post-assessment</th></tr>
-<tr><th>Clarity of thought and expression</th>{indiv_rating('clarity')}</tr>
-<tr><th>Response to Queries</th>{indiv_rating('q_response')}</tr>
-<tr><th>Team Player</th>{indiv_rating('team_play')}</tr>
-<tr><th>Confidence</th>{indiv_rating('confidence')}</tr>
-<tr><th>Utilization of mentor and experts</th>{indiv_rating('util_mentor')}</tr>
+<tr><th>Criteria</th><th>Mid-program assessment</th><th>Final assessment</th></tr>
+<tr><th>Maintainability: Simplicity & Precision</th>
+    <td>{r.message_mid(record, '1-maintainability')}</td>
+    <td>{r.message_final(record, '2-code organization')}</td></tr>
+<tr><th>Handling 'unhappy' scenarios</th>
+    <td>{r.message_mid(record, '1-reliability')}</td>
+    <td>{r.message_final(record, '2-reliability / error handling')}</td></tr>
+<tr><th>Unit testing</th>
+    <td>{r.message_mid(record, '1-dev.efficiency')}</td>
+    <td>{r.message_final(record, '2-ci pipe')}</td></tr>'
 </table>
-<p>5 = Excellent, 4 = Good, 3 = Acceptable, 2 = Needs focus, 1 = Needs help</p>
-<br><p>{optional_individual_remark('Additional Remark', 'remark')}</p>
+<br><p>{r.optional_remark(record)}</p>
 </html>
 '''
 
@@ -133,13 +117,13 @@ def filename_from_email(email):
     return email.split('>')[-1].split('@')[0].replace('.', ' ')
 
 
-def frame_attachments(team, groups_report, members_report):
+def frame_attachments(team):
     attachments = []
     for member in team:
         filename = filename_from_email(member['fresh_email'])
         reportfile_of_member = find_report(filename)
         if not reportfile_of_member:
-            html = make_html_for_member(member, groups_report, members_report)
+            html = make_html_for_member(member['fresh_record'])
             reportfile_of_member = write_report(filename, html)
         else:
             print(f"NOT generating {reportfile_of_member} again")
@@ -147,11 +131,11 @@ def frame_attachments(team, groups_report, members_report):
     return attachments
 
 
-def frame_mail(manager_name, manager_contact, team, groups_report, members_report):
+def frame_mail(manager_name, manager_contact, team):
     mail = {'to': manager_contact,
             'cc': 'sudeep.prasad@philips.com; agusty.rebekah@philips.com',
             'subject': 'Bootcamp assessment-summary for your team member(s)',
-            'body': frame_body(manager_name, team, groups_report, members_report),
-            'attachments': frame_attachments(team, groups_report, members_report)
+            'body': frame_body(manager_name, team),
+            'attachments': frame_attachments(team)
            }
     return mail
