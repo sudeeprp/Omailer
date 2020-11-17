@@ -54,6 +54,8 @@ h1, h2, p, table {{font-family: "Verdana";font-size: 100%;}}
 table {{border-collapse: collapse;}}
 table, td, th {{border: 1px solid #aaa;padding: 8px;}}
 </style>
+<h1><img src="PhilipsUnivLogo.png" alt="Philips University" width="80">&nbsp;&nbsp;Bootcamp Learning Journey 2020 - Individual Summary</h1>
+<hr><br>
 <h1>{record['name']}</h1>
 <p>e-mail: {record['participant philips email']}</p>
 <br><h2>Performance Track on Deliverables</h2>
@@ -142,8 +144,8 @@ def frame_attachments(team):
 
 def frame_mail(manager_name, manager_contact, team):
     mail = {'to': manager_contact,
-            'cc': 'sudeep.prasad@philips.com; agusty.rebekah@philips.com',
-            'subject': 'Bootcamp assessment-summary for your team member(s)',
+            'cc': 'agusty.rebekah@philips.com',
+            'subject': 'Bootcamp Assessment - Summary for Your Team Member(s)',
             'body': frame_body(manager_name, team),
             'attachments': frame_attachments(team)
            }
