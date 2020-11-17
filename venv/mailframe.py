@@ -16,24 +16,26 @@ def team_bullet_list(team):
 
 def frame_body(manager_name, team):
     return f'''<html><body style='font-family: "Verdana";'>Hi {manager_name},<br>
-The bootcamp assessment reports are attached.
-These assessments are focused on opportunities to build their skills further.<br>
-Some assessments may not be evaluated due to their absence / exams. Other reasons, if any, are marked in the report.<br>
+We are happy to share the consolidated bootcamp assessment report for your team member(s).
 <br>
-As part of the process, we will approach you post 90 days to understand:
+The following member(s) from your team completed the bootcamp recently:
+
+{team_bullet_list(team)}
+
+<p>These assessments are focused on opportunities to build their skills further.<br>
+Some assessments may not be evaluated due to their absence / exams. Other reasons, if any, are marked in the report.<br>
+<br></p>
+As part of the process, we will approach you post 90 days to understand the training effectiveness:
 <ul>
 <li>Usefulness of the program</li>
 <li>Do the participants need further interventions?</li>
 <li>How the program can be improved for future batches</li>
 </ul>
-The following member(s) from your team completed the bootcamp recently:
-
-{team_bullet_list(team)}
-
-Please let us know any impressions, or if you need clarifications.<br>
+<br>
+Awaiting your remarks. Please feel free to reach out for any further clarifications.<br>
 <br>
 Thank you,<br>
-  L&D Team
+  PIC L&D Team
 </body></html>
 '''
 
@@ -54,11 +56,32 @@ table, td, th {{border: 1px solid #aaa;padding: 8px;}}
 </style>
 <h1>{record['name']}</h1>
 <p>e-mail: {record['participant philips email']}</p>
-<br><h2>Participant Performance Track</h2>
-<p>As part of the bootcamp, participants submitted assignments and worked in teams on case-studies.
+<br><h2>Performance Track on Deliverables</h2>
+<p>As part of the bootcamp, participants submitted individual assignments and worked in teams on two case-studies.<br>
 In the second case study, participants exchanged their work to make improvements on another team's code.
-This is {record['name'].split()[0].title()}'s team-assessment, done as per Philips Behaviors.
-The Philips Behaviors have been tailored to the work they may perform as fresh engineers</p>
+Capabilities were assessed at the middle of the program and towards the end as well.<br>
+<br>The scores are given below.<br>
+<table>
+<tr><th>Criteria</th><th>Mid-program assessment</th><th>Final assessment</th></tr>
+<tr><th>Maintainability: Simplicity & Precision</th>
+    <td>{r.message_mid(record, '1-maintainability')}</td>
+    <td>{r.message_final(record, '2-code organization')}</td></tr>
+<tr><th>Handling 'unhappy' scenarios</th>
+    <td>{r.message_mid(record, '1-reliability')}</td>
+    <td>{r.message_final(record, '2-reliability / error handling')}</td></tr>
+<tr><th>Unit testing</th>
+    <td>{r.message_mid(record, '1-dev.efficiency')}</td>
+    <td>{r.message_final(record, '2-ci pipe')}</td></tr>
+</table>
+* Getting started: Knowledge is present, deliverables do not demonstrate practice.<br>
+* Initial practice: Deliverables meet requirements. More consistency expected on the quality front.<br>
+* Standard practice: Good quality deliverables as expected.<br>
+* Advanced practice: Excellent deliverables, which can sustain quality in future.<br>
+</p>
+<br>
+<h2>Overall Performance on Values</h2>
+<p>This assessment is done as per Philips Behaviors.
+The Philips Behaviors have been tailored to the work they may perform as fresh engineers.</p>
 <table>
 <tr>
 <th>Customers first</th>
@@ -76,20 +99,6 @@ The Philips Behaviors have been tailored to the work they may perform as fresh e
 <th><p>Team up to win</p><p>Take ownership to deliver fast</p></th>
 <td>{r.teamwork_ownership(record)}</td>
 </tr>
-</table>
-<br><h2>Individual Performance Track</h2>
-<p>Capabilities were assessed at the beginning of the program and towards the end as well. The scores are given below.</p>
-<table>
-<tr><th>Criteria</th><th>Mid-program assessment</th><th>Final assessment</th></tr>
-<tr><th>Maintainability: Simplicity & Precision</th>
-    <td>{r.message_mid(record, '1-maintainability')}</td>
-    <td>{r.message_final(record, '2-code organization')}</td></tr>
-<tr><th>Handling 'unhappy' scenarios</th>
-    <td>{r.message_mid(record, '1-reliability')}</td>
-    <td>{r.message_final(record, '2-reliability / error handling')}</td></tr>
-<tr><th>Unit testing</th>
-    <td>{r.message_mid(record, '1-dev.efficiency')}</td>
-    <td>{r.message_final(record, '2-ci pipe')}</td></tr>'
 </table>
 <br><p>{r.optional_remark(record)}</p>
 </html>

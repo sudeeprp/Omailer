@@ -2,30 +2,11 @@ import os
 import json
 import excel2json
 import omailer
-import group_report
 import mailframe
 
 
-FRESH_EMAIL_TO_MANAGER_MAP = r'incoming\member email to manager map.xlsx'
-PROCESSED_MANAGER_MAP_TIDY = r'processed\manager_map.json'
-PARTICIPANTS_REPORT_FILE = r'incoming\feedback-2020.xlsx'
-
-
-def get_fresh_email_to_manager_email():
-    fresh_email_to_manager_email = {}
-    if os.path.isfile(FRESH_EMAIL_TO_MANAGER_MAP):
-        fresh_manager_emails = excel2json.rows_to_dict_list(FRESH_EMAIL_TO_MANAGER_MAP)
-        for email_pair in fresh_manager_emails:
-            fresh_email_to_manager_email[email_pair['participant philips email'].lower()]\
-                = email_pair['joining team manager email'].lower()
-    return fresh_email_to_manager_email
-
-
-def get_name(row):
-    if 'name' in row:
-        return row['name']
-    else:
-        return row['1-name']
+PROCESSED_MANAGER_MAP_TIDY = os.path.join('processed', 'manager_map.json')
+PARTICIPANTS_REPORT_FILE = os.path.join('incoming', 'feedback-2020.xlsx')
 
 
 def select_for_feedback(rows):
@@ -54,11 +35,6 @@ def write_manager_map(mapped_rows):
     with open(PROCESSED_MANAGER_MAP_TIDY, 'w') as f:
         f.write(json.dumps(manager_map, indent=2))
     print('\nWrote {} managers'.format(len(manager_map)))
-
-
-def read_manager_map():
-    with open(PROCESSED_MANAGER_MAP_TIDY, 'r') as f:
-        return json.loads(f.read())
 
 
 def mail_managers(manager_map_filename):
